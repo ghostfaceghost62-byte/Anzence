@@ -15,6 +15,8 @@
             --text-main: #334155;
             --text-light: #64748b;
             --border-color: #e2e8f0;
+            --table-header-bg: #0f172a;
+            --table-anzence-bg: rgba(2, 132, 199, 0.05);
         }
 
         /* Dark Mode Variables */
@@ -25,6 +27,8 @@
             --text-main: #f1f5f9;
             --text-light: #cbd5e1;
             --border-color: #334155;
+            --table-header-bg: #1e293b;
+            --table-anzence-bg: rgba(2, 132, 199, 0.2);
         }
 
         * {
@@ -291,9 +295,9 @@
         /* --- Comparison Table --- */
         .compare-table-wrapper { max-width: 900px; margin: 0 auto; overflow-x: auto; }
         table { width: 100%; border-collapse: collapse; background: var(--primary-bg); border-radius: 12px; overflow: hidden; box-shadow: 0 10px 30px rgba(0,0,0,0.05); }
-        th, td { padding: 1.5rem; text-align: left; border-bottom: 1px solid var(--border-color); }
-        th { background: var(--brand-dark); color: white; }
-        .anzence-col { background: rgba(2, 132, 199, 0.05); font-weight: bold; color: var(--brand-accent); }
+        th, td { padding: 1.5rem; text-align: left; border-bottom: 1px solid var(--border-color); transition: background-color 0.3s; }
+        th { background: var(--table-header-bg); color: white; }
+        .anzence-col { background: var(--table-anzence-bg); font-weight: bold; color: var(--brand-accent); }
 
         /* --- FAQ Accordion --- */
         .faq-section { max-width: 800px; margin: 0 auto; }
@@ -338,7 +342,7 @@
 
     <div id="inquiryModal" class="modal-overlay">
         <div class="modal-content">
-            <span class="close-btn" onclick="closeModal()">&times;</span>
+            <span class="close-btn" onclick="closeModal()">×</span>
             <h2>Inquire / Pre-Order</h2>
             <form id="inquiryForm">
                 <div class="modal-form-group">
@@ -474,7 +478,7 @@
                 <thead>
                     <tr>
                         <th>Feature</th>
-                        <th class="anzence-col">Anzence ID</th>
+                        <th>Anzence ID</th>
                         <th>Generic GPS Watch</th>
                         <th>Standard ID</th>
                     </tr>
