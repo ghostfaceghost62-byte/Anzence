@@ -1,0 +1,659 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Anzence | Next-Gen Student Security</title>
+    <style>
+        /* --- Core Variables & Reset --- */
+        :root {
+            --primary-bg: #ffffff;
+            --secondary-bg: #f8fafc;
+            --brand-dark: #0f172a;
+            --brand-accent: #0284c7;
+            --brand-danger: #e11d48;
+            --text-main: #334155;
+            --text-light: #64748b;
+            --border-color: #e2e8f0;
+        }
+
+        /* Dark Mode Variables */
+        body.dark-mode {
+            --primary-bg: #0f172a;
+            --secondary-bg: #1e293b;
+            --brand-dark: #ffffff;
+            --text-main: #f1f5f9;
+            --text-light: #cbd5e1;
+            --border-color: #334155;
+        }
+
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+            font-family: 'Inter', 'Segoe UI', system-ui, sans-serif;
+        }
+
+        html { scroll-behavior: smooth; }
+
+        body {
+            background-color: var(--primary-bg);
+            color: var(--text-main);
+            line-height: 1.6;
+            overflow-x: hidden;
+            transition: background-color 0.3s, color 0.3s;
+        }
+
+        /* --- Animations --- */
+        .animate-on-scroll {
+            opacity: 0;
+            transform: translateY(30px);
+            transition: opacity 0.8s ease-out, transform 0.8s ease-out;
+        }
+        
+        .animate-on-scroll.is-visible {
+            opacity: 1;
+            transform: translateY(0);
+        }
+
+        /* --- Navigation --- */
+        header {
+            background-color: rgba(15, 23, 42, 0.95);
+            backdrop-filter: blur(10px);
+            color: white;
+            padding: 1rem 5%;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            position: sticky;
+            top: 0;
+            z-index: 1000;
+            box-shadow: 0 2px 10px rgba(0,0,0,0.1);
+        }
+
+        .logo {
+            font-size: 1.5rem;
+            font-weight: 800;
+            letter-spacing: -0.5px;
+            color: white;
+            text-decoration: none;
+        }
+
+        .logo span { color: var(--brand-accent); }
+
+        .nav-links { display: flex; align-items: center; }
+
+        nav a {
+            color: white;
+            text-decoration: none;
+            margin-left: 2rem;
+            font-size: 0.9rem;
+            font-weight: 500;
+            transition: color 0.3s;
+        }
+
+        nav a:hover { color: var(--brand-accent); }
+
+        .theme-toggle {
+            background: none;
+            border: 1px solid #334155;
+            color: white;
+            padding: 0.4rem 0.8rem;
+            border-radius: 20px;
+            margin-left: 2rem;
+            cursor: pointer;
+            font-size: 0.8rem;
+            transition: background 0.3s;
+        }
+        .theme-toggle:hover { background: #334155; }
+
+        /* --- Hero Section --- */
+        .hero {
+            background: radial-gradient(circle at top right, #1e293b, #0f172a);
+            color: white;
+            padding: 8rem 5% 6rem;
+            text-align: center;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+        }
+
+        .hero h1 {
+            font-size: clamp(2.5rem, 5vw, 4rem);
+            line-height: 1.1;
+            margin-bottom: 1.5rem;
+            max-width: 900px;
+        }
+
+        .hero p {
+            font-size: 1.25rem;
+            color: #cbd5e1;
+            max-width: 700px;
+            margin-bottom: 2.5rem;
+        }
+
+        .cta-button {
+            background-color: var(--brand-accent);
+            color: white;
+            padding: 1.2rem 2.5rem;
+            border: none;
+            border-radius: 50px;
+            font-size: 1.1rem;
+            font-weight: 600;
+            cursor: pointer;
+            text-decoration: none;
+            transition: all 0.3s ease;
+            box-shadow: 0 4px 14px 0 rgba(2, 132, 199, 0.39);
+            display: inline-block;
+        }
+
+        .cta-button:hover {
+            background-color: #0369a1;
+            transform: translateY(-3px);
+            box-shadow: 0 6px 20px rgba(2, 132, 199, 0.23);
+        }
+
+        /* --- Modal Form --- */
+        .modal-overlay {
+            display: none; position: fixed; top: 0; left: 0; width: 100%; height: 100%;
+            background: rgba(15, 23, 42, 0.8); z-index: 2000; justify-content: center; align-items: center;
+            backdrop-filter: blur(5px);
+        }
+        .modal-overlay.active { display: flex; }
+        .modal-content {
+            background: var(--primary-bg); padding: 2.5rem; border-radius: 16px; width: 90%; max-width: 450px;
+            position: relative; box-shadow: 0 20px 50px rgba(0,0,0,0.2); border: 1px solid var(--border-color);
+        }
+        .modal-content h2 { color: var(--brand-dark); margin-bottom: 1.5rem; font-size: 1.8rem; }
+        .close-btn { position: absolute; top: 1rem; right: 1.5rem; font-size: 1.8rem; cursor: pointer; color: var(--text-light); }
+        .modal-form-group { margin-bottom: 1.2rem; }
+        .modal-form-group input, .modal-form-group select {
+            width: 100%; padding: 0.8rem 1rem; border: 1px solid var(--border-color); border-radius: 8px;
+            background: var(--secondary-bg); color: var(--text-main); font-family: inherit; font-size: 1rem;
+        }
+
+        /* --- Logos / Partners --- */
+        .partner-strip {
+            background: var(--secondary-bg);
+            padding: 2rem 5%;
+            display: flex;
+            justify-content: center;
+            gap: 3rem;
+            flex-wrap: wrap;
+            opacity: 0.6;
+            border-bottom: 1px solid var(--border-color);
+        }
+        .partner-strip img { height: 30px; filter: grayscale(100%); transition: 0.3s; }
+        .partner-strip img:hover { filter: grayscale(0%); opacity: 1; }
+
+        /* --- Section Styling --- */
+        .section { padding: 6rem 5%; }
+        .section-gray { background-color: var(--secondary-bg); }
+
+        .section-title {
+            text-align: center;
+            font-size: 2.5rem;
+            color: var(--brand-dark);
+            margin-bottom: 1rem;
+        }
+
+        .section-subtitle {
+            text-align: center;
+            color: var(--text-light);
+            margin-bottom: 4rem;
+            font-size: 1.1rem;
+            max-width: 600px;
+            margin-left: auto;
+            margin-right: auto;
+        }
+
+        /* --- Stats Section --- */
+        .stats-container {
+            display: flex;
+            justify-content: space-around;
+            max-width: 1000px;
+            margin: 0 auto 4rem auto;
+            text-align: center;
+        }
+        .stat-box h4 { font-size: 3rem; color: var(--brand-accent); margin-bottom: 0.5rem; }
+        .stat-box p { color: var(--text-light); font-weight: 500; text-transform: uppercase; letter-spacing: 1px; }
+
+        /* --- Feature Grid --- */
+        .grid-custom {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(280px, 1fr));
+            gap: 2rem;
+            max-width: 1200px;
+            margin: 0 auto;
+        }
+
+        .feature-card {
+            background: var(--primary-bg);
+            padding: 2.5rem;
+            border-radius: 16px;
+            box-shadow: 0 10px 25px -5px rgba(0, 0, 0, 0.05);
+            transition: all 0.3s ease;
+            border: 1px solid var(--border-color);
+        }
+
+        .feature-card:hover {
+            transform: translateY(-10px);
+            border-color: var(--brand-accent);
+        }
+
+        .feature-icon { font-size: 2rem; margin-bottom: 1.5rem; display: inline-block; }
+        .feature-card h3 { color: var(--brand-dark); margin-bottom: 1rem; font-size: 1.4rem; }
+
+        /* --- Product Showcase --- */
+        .product-showcase {
+            display: flex;
+            flex-wrap: wrap;
+            align-items: center;
+            gap: 4rem;
+            max-width: 1200px;
+            margin: 0 auto;
+        }
+
+        .product-image {
+            flex: 1;
+            min-width: 300px;
+            border-radius: 24px;
+            overflow: hidden;
+            box-shadow: 0 20px 50px rgba(0,0,0,0.1);
+            position: relative;
+        }
+
+        .product-image img { width: 100%; display: block; }
+        .video-play-btn {
+            position: absolute;
+            top: 50%; left: 50%;
+            transform: translate(-50%, -50%);
+            background: rgba(2, 132, 199, 0.8);
+            color: white;
+            border-radius: 50%;
+            width: 80px; height: 80px;
+            display: flex; justify-content: center; align-items: center;
+            font-size: 2rem; cursor: pointer; backdrop-filter: blur(5px);
+        }
+
+        .product-info { flex: 1; min-width: 300px; }
+        .price-tag { font-size: 3.5rem; font-weight: 800; color: var(--brand-dark); margin: 1rem 0; }
+        .price-sub { font-size: 1rem; color: var(--text-light); font-weight: 500; }
+
+        /* --- Tech Specs --- */
+        .tech-specs {
+            display: grid; grid-template-columns: 1fr 1fr; gap: 1rem; margin: 2rem 0;
+        }
+        .tech-spec-item {
+            background: var(--primary-bg); padding: 1rem; border-radius: 8px; border: 1px solid var(--border-color);
+        }
+
+        /* --- Comparison Table --- */
+        .compare-table-wrapper { max-width: 900px; margin: 0 auto; overflow-x: auto; }
+        table { width: 100%; border-collapse: collapse; background: var(--primary-bg); border-radius: 12px; overflow: hidden; box-shadow: 0 10px 30px rgba(0,0,0,0.05); }
+        th, td { padding: 1.5rem; text-align: left; border-bottom: 1px solid var(--border-color); }
+        th { background: var(--brand-dark); color: white; }
+        .anzence-col { background: rgba(2, 132, 199, 0.05); font-weight: bold; color: var(--brand-accent); }
+
+        /* --- FAQ Accordion --- */
+        .faq-section { max-width: 800px; margin: 0 auto; }
+        .faq-item { border-bottom: 1px solid var(--border-color); padding: 1.5rem 0; cursor: pointer; }
+        .faq-question { font-weight: 600; display: flex; justify-content: space-between; align-items: center; color: var(--brand-dark); }
+        .faq-answer { max-height: 0; overflow: hidden; transition: max-height 0.3s ease-out; color: var(--text-light); margin-top: 0; opacity: 0; }
+        .faq-item.active .faq-answer { max-height: 200px; margin-top: 1rem; opacity: 1; }
+
+        /* --- Testimonials --- */
+        .testimonial-grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(300px, 1fr)); gap: 2rem; max-width: 1000px; margin: 0 auto; }
+        .testimonial-card { background: var(--primary-bg); padding: 2rem; border-radius: 12px; border: 1px solid var(--border-color); font-style: italic; }
+        .author { margin-top: 1rem; font-weight: bold; font-style: normal; color: var(--brand-dark); }
+
+        /* --- Contact & Map --- */
+        .contact-container { display: grid; grid-template-columns: 1fr 1fr; gap: 4rem; max-width: 1200px; margin: 0 auto; }
+        .contact-info li { list-style: none; margin-bottom: 2rem; }
+        .contact-info strong { color: var(--brand-dark); text-transform: uppercase; font-size: 0.8rem; letter-spacing: 1px; display: block; margin-bottom: 0.5rem; }
+        .map-wrapper { width: 100%; height: 400px; border-radius: 20px; overflow: hidden; box-shadow: 0 10px 30px rgba(0,0,0,0.1); }
+
+        /* --- Floating Chat --- */
+        .floating-chat {
+            position: fixed; bottom: 30px; right: 30px; background: #25D366; color: white;
+            width: 60px; height: 60px; border-radius: 50%; display: flex; justify-content: center; align-items: center;
+            font-size: 2rem; box-shadow: 0 4px 15px rgba(37, 211, 102, 0.4); z-index: 1000; text-decoration: none; transition: 0.3s;
+        }
+        .floating-chat:hover { transform: scale(1.1); }
+
+        /* --- Footer --- */
+        footer { background-color: #0f172a; color: white; padding: 4rem 5%; text-align: center; }
+        .social-links a { color: #94a3b8; text-decoration: none; margin: 0 1rem; transition: color 0.3s; }
+        .social-links a:hover { color: white; }
+
+        @media (max-width: 768px) {
+            .contact-container { grid-template-columns: 1fr; }
+            .hero { padding-top: 6rem; }
+            .section { padding: 4rem 5%; }
+            .nav-links { display: none; }
+        }
+    </style>
+</head>
+<body>
+
+    <div id="inquiryModal" class="modal-overlay">
+        <div class="modal-content">
+            <span class="close-btn" onclick="closeModal()">&times;</span>
+            <h2>Inquire / Pre-Order</h2>
+            <form id="inquiryForm">
+                <div class="modal-form-group">
+                    <input type="text" id="inqName" placeholder="Name or Institution" required>
+                </div>
+                <div class="modal-form-group">
+                    <input type="email" id="inqEmail" placeholder="Email Address" required>
+                </div>
+                <div class="modal-form-group">
+                    <select id="inqType" required>
+                        <option value="" disabled selected>Select Inquiry Type...</option>
+                        <option value="Single Pre-Order">Single Pre-Order</option>
+                        <option value="Bulk Order (500+)">Bulk Order (500+)</option>
+                        <option value="Demo Request">Demo Request</option>
+                    </select>
+                </div>
+                <button type="submit" class="cta-button" style="width: 100%; border-radius: 8px;">Submit</button>
+            </form>
+        </div>
+    </div>
+
+    <header>
+        <a href="#" class="logo">ANZENCE<span>.</span></a>
+        <div class="nav-links">
+            <nav>
+                <a href="#features">Features</a>
+                <a href="#product">Product</a>
+                <a href="#compare">Compare</a>
+                <a href="#faq">FAQ</a>
+            </nav>
+            <button class="theme-toggle" id="themeToggle">🌙 Dark Mode</button>
+        </div>
+    </header>
+
+    <section class="hero">
+        <h1 class="animate-on-scroll">The Gold Standard in Student Safety.</h1>
+        <p class="animate-on-scroll">More than just an ID holder. Anzence is a lifeline that integrates high-precision GPS, instant distress alerts, and long-range communication.</p>
+        <button onclick="openModal()" class="cta-button animate-on-scroll">Inquire for Your School</button>
+    </section>
+
+    <div class="partner-strip animate-on-scroll">
+        <img src="https://placehold.co/150x50/e2e8f0/64748b?text=TechBlog" alt="Partner">
+        <img src="https://placehold.co/150x50/e2e8f0/64748b?text=School+District" alt="Partner">
+        <img src="https://placehold.co/150x50/e2e8f0/64748b?text=Safety+Standard" alt="Partner">
+    </div>
+
+    <section id="features" class="section">
+        
+        <div class="stats-container animate-on-scroll">
+            <div class="stat-box">
+                <h4 class="counter" data-target="14">0</h4>
+                <p>Days Battery</p>
+            </div>
+            <div class="stat-box">
+                <h4><<span class="counter" data-target="5">0</span>m</h4>
+                <p>GPS Accuracy</p>
+            </div>
+            <div class="stat-box">
+                <h4>IP67</h4>
+                <p>Waterproof</p>
+            </div>
+        </div>
+
+        <h2 class="section-title animate-on-scroll">Advanced Protection</h2>
+        <p class="section-subtitle animate-on-scroll">Equipped with cutting-edge technology to ensure students are safe every second of the day.</p>
+        
+        <div class="grid-custom">
+            <div class="feature-card animate-on-scroll">
+                <span class="feature-icon">📍</span>
+                <h3>Geo-Fencing</h3>
+                <p>Set safe zones like school and home. Receive instant mobile alerts the moment a student crosses the boundary.</p>
+            </div>
+            <div class="feature-card animate-on-scroll">
+                <span class="feature-icon">🔋</span>
+                <h3>14-Day Battery</h3>
+                <p>Industry-leading power management ensures the device stays active for up to two weeks on a single charge.</p>
+            </div>
+            <div class="feature-card animate-on-scroll">
+                <span class="feature-icon">💧</span>
+                <h3>Water Resistant</h3>
+                <p>Built with an IP67-rated casing to withstand heavy rain, splashes, and the rigors of active campus life.</p>
+            </div>
+            <div class="feature-card animate-on-scroll">
+                <span class="feature-icon">🎙️</span>
+                <h3>Two-Way Audio</h3>
+                <p>Integrated micro-speakers allow for crystal clear two-way communication during critical SOS events.</p>
+            </div>
+            <div class="feature-card animate-on-scroll">
+                <span class="feature-icon">📱</span>
+                <h3>Parent Dashboard</h3>
+                <p>A seamless mobile app experience to track live location, view location history, and manage device settings.</p>
+            </div>
+            <div class="feature-card animate-on-scroll" style="border-top: 4px solid var(--brand-danger);">
+                <span class="feature-icon">🚨</span>
+                <h3>Discreet SOS</h3>
+                <p>One silent press sends an immediate alert with live coordinates to emergency contacts and school security.</p>
+            </div>
+        </div>
+    </section>
+
+    <section id="product" class="section section-gray">
+        <div class="product-showcase">
+            <div class="product-image animate-on-scroll">
+                <img src="https://placehold.co/800x600/0f172a/white?text=Product+Demo+Video" alt="Anzence Device">
+                <div class="video-play-btn">▶</div>
+            </div>
+            <div class="product-info animate-on-scroll">
+                <h2 class="section-title" style="text-align: left;">Secure The Future.</h2>
+                <p style="margin: 1.5rem 0; font-size: 1.1rem; color: var(--text-light);">We’ve removed the complexity of safety. No monthly contracts, no hidden cellular fees—just reliable protection for your child.</p>
+                
+                <div class="price-tag">
+                    ₱2,999 <span class="price-sub">per unit</span>
+                </div>
+                
+                <div class="tech-specs">
+                    <div class="tech-spec-item"><strong>Network:</strong> 4G/LTE-M</div>
+                    <div class="tech-spec-item"><strong>Weight:</strong> 45 grams</div>
+                    <div class="tech-spec-item"><strong>Material:</strong> Polycarbonate</div>
+                    <div class="tech-spec-item"><strong>Fit:</strong> Standard IDs</div>
+                </div>
+
+                <button onclick="openModal()" class="cta-button">Pre-Order Now</button>
+            </div>
+        </div>
+    </section>
+
+    <section id="compare" class="section">
+        <h2 class="section-title animate-on-scroll">Why Choose Anzence?</h2>
+        <p class="section-subtitle animate-on-scroll">See how we stack up against traditional safety alternatives.</p>
+        
+        <div class="compare-table-wrapper animate-on-scroll">
+            <table>
+                <thead>
+                    <tr>
+                        <th>Feature</th>
+                        <th class="anzence-col">Anzence ID</th>
+                        <th>Generic GPS Watch</th>
+                        <th>Standard ID</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    <tr>
+                        <td>Monthly Subscription</td>
+                        <td class="anzence-col">None (Included)</td>
+                        <td>₱300 - ₱500/mo</td>
+                        <td>N/A</td>
+                    </tr>
+                    <tr>
+                        <td>Battery Life</td>
+                        <td class="anzence-col">14 Days</td>
+                        <td>1 - 2 Days</td>
+                        <td>N/A</td>
+                    </tr>
+                    <tr>
+                        <td>Discreet SOS</td>
+                        <td class="anzence-col">Yes (Hidden Button)</td>
+                        <td>Visible / Obvious</td>
+                        <td>No</td>
+                    </tr>
+                    <tr>
+                        <td>School Policy Compliance</td>
+                        <td class="anzence-col">100% Compliant</td>
+                        <td>Often Banned</td>
+                        <td>100% Compliant</td>
+                    </tr>
+                </tbody>
+            </table>
+        </div>
+    </section>
+
+    <section class="section section-gray">
+        <h2 class="section-title animate-on-scroll">Trusted by Parents</h2>
+        <div class="testimonial-grid animate-on-scroll">
+            <div class="testimonial-card">
+                "The peace of mind this gives me is priceless. The battery life is incredible, I only charge it every other weekend."
+                <div class="author">- Maria Santos, Parent</div>
+            </div>
+            <div class="testimonial-card">
+                "We banned smartwatches in our classrooms due to distraction, but Anzence solves the security issue while remaining completely invisible."
+                <div class="author">- Principal Reyes, High School</div>
+            </div>
+        </div>
+    </section>
+
+    <section id="faq" class="section">
+        <div class="faq-section animate-on-scroll">
+            <h2 class="section-title">Common Questions</h2>
+            <div class="faq-item">
+                <div class="faq-question">Is there a monthly subscription fee? <span>+</span></div>
+                <div class="faq-answer">No. Anzence is a one-time purchase. We provide lifetime connectivity included in the initial price.</div>
+            </div>
+            <div class="faq-item">
+                <div class="faq-question">How accurate is the GPS? <span>+</span></div>
+                <div class="faq-answer">Anzence uses high-precision ceramic antennas, providing accuracy within 5-10 meters in outdoor environments.</div>
+            </div>
+            <div class="faq-item">
+                <div class="faq-question">Can it get wet in the rain? <span>+</span></div>
+                <div class="faq-answer">Yes! It is IP67 rated, meaning it can handle heavy rain and accidental drops in puddles.</div>
+            </div>
+        </div>
+    </section>
+
+    <section id="contact" class="section section-gray">
+        <div class="contact-container">
+            <div class="contact-info animate-on-scroll">
+                <h2 style="font-size: 2.5rem; margin-bottom: 2rem; color: var(--brand-dark);">Get in Touch</h2>
+                <ul>
+                    <li><strong>Regional Office</strong> Cypress Village, 80 Miami, Cainta, 1900 Rizal</li>
+                    <li><strong>Business Inquiries</strong> anzenceco@gmail.com</li>
+                    <li><strong>Hotline</strong> +63 9XX XXX XXXX</li>
+                </ul>
+            </div>
+            <div class="animate-on-scroll">
+                <div class="map-wrapper">
+                    <iframe src="https://www.google.com/maps/embed?pb=!1m18!1m12!1m3!1d3861.1088104368764!2d121.1143581!3d14.5928751!2m3!1f0!2f0!3f0!3m2!1i1024!2i768!4f13.1!3m3!1m2!1s0x3397b878251dd8d7%3A0x519f40ed5bf22166!2sCypress%20Village%2C%2080%20Miami%2C%20Cainta%2C%201900%20Rizal!5e0!3m2!1sen!2sph!4v1776558872964!5m2!1sen!2sph" width="100%" height="100%" style="border:0;" allowfullscreen="" loading="lazy"></iframe>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <footer>
+        <div class="social-links" style="margin-bottom: 2rem;">
+            <a href="https://www.facebook.com/profile.php?id=61580898796244">Facebook</a>
+            <a href="#">Instagram</a>
+            <a href="#">LinkedIn</a>
+        </div>
+        <p style="font-size: 0.9rem; color: #64748b;">© 2026 ANZENCE TECHNOLOGIES. All Rights Reserved.</p>
+    </footer>
+
+    <a href="#" class="floating-chat" title="Chat with us on Messenger">💬</a>
+
+    <script>
+        // Modal Logic
+        const modal = document.getElementById('inquiryModal');
+        function openModal() { modal.classList.add('active'); }
+        function closeModal() { modal.classList.remove('active'); }
+
+        // Form Submission to Local Storage
+        document.getElementById('inquiryForm').addEventListener('submit', function(e) {
+            e.preventDefault();
+            
+            // Get form values
+            const name = document.getElementById('inqName').value;
+            const email = document.getElementById('inqEmail').value;
+            const type = document.getElementById('inqType').value;
+            
+            // Generate current date
+            const dateObj = new Date();
+            const dateStr = dateObj.toLocaleDateString('en-US', { month: 'short', day: 'numeric', year: 'numeric' });
+
+            // Create new entry object
+            const newEntry = { date: dateStr, name: name, email: email, type: type, status: 'New' };
+
+            // Retrieve existing data from localStorage or create empty array
+            let inquiries = JSON.parse(localStorage.getItem('anzence_inquiries')) || [];
+            
+            // Add new entry to the beginning of the list
+            inquiries.unshift(newEntry);
+            
+            // Save back to localStorage
+            localStorage.setItem('anzence_inquiries', JSON.stringify(inquiries));
+
+            alert('Thank you! Your inquiry has been submitted and will appear in the Admin Dashboard.');
+            closeModal();
+            this.reset();
+        });
+
+        document.addEventListener("DOMContentLoaded", () => {
+            // Scroll Animation Observer
+            const observer = new IntersectionObserver((entries) => {
+                entries.forEach(entry => {
+                    if (entry.isIntersecting) {
+                        entry.target.classList.add('is-visible');
+                        
+                        const counters = entry.target.querySelectorAll('.counter');
+                        counters.forEach(counter => {
+                            const target = +counter.getAttribute('data-target');
+                            const updateCount = () => {
+                                const c = +counter.innerText;
+                                const increment = target / 30;
+                                if(c < target) {
+                                    counter.innerText = Math.ceil(c + increment);
+                                    setTimeout(updateCount, 40);
+                                } else {
+                                    counter.innerText = target;
+                                }
+                            };
+                            updateCount();
+                        });
+                    }
+                });
+            }, { threshold: 0.1 });
+
+            document.querySelectorAll('.animate-on-scroll').forEach(el => observer.observe(el));
+
+            // FAQ Accordion
+            document.querySelectorAll('.faq-item').forEach(item => {
+                item.addEventListener('click', () => {
+                    item.classList.toggle('active');
+                    const icon = item.querySelector('span');
+                    icon.textContent = item.classList.contains('active') ? '-' : '+';
+                });
+            });
+
+            // Dark Mode Toggle
+            const themeBtn = document.getElementById('themeToggle');
+            themeBtn.addEventListener('click', () => {
+                document.body.classList.toggle('dark-mode');
+                if(document.body.classList.contains('dark-mode')) {
+                    themeBtn.textContent = '☀️ Light Mode';
+                } else {
+                    themeBtn.textContent = '🌙 Dark Mode';
+                }
+            });
+        });
+    </script>
+</body>
+</html>

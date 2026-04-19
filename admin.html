@@ -1,0 +1,339 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Anzence Admin Dashboard</title>
+    <style>
+        :root {
+            --brand-dark: #0f172a;
+            --brand-accent: #0284c7;
+            --bg-color: #f8fafc;
+            --sidebar-bg: #1e293b;
+            --border-color: #e2e8f0;
+        }
+
+        * { margin: 0; padding: 0; box-sizing: border-box; font-family: 'Inter', system-ui, sans-serif; }
+        
+        body { 
+            display: flex; 
+            min-height: 100vh; 
+            background-color: var(--bg-color); 
+            color: #334155; 
+            overflow-x: hidden;
+        }
+
+        /* --- Sidebar --- */
+        .sidebar { 
+            width: 260px; 
+            background: var(--sidebar-bg); 
+            color: white; 
+            padding: 2rem 1rem; 
+            flex-shrink: 0;
+            transition: transform 0.3s ease;
+            z-index: 1000;
+        }
+        
+        .sidebar h2 { margin-bottom: 2rem; padding-left: 1rem; color: white; font-weight: 800; letter-spacing: -0.5px;}
+        .sidebar h2 span { color: var(--brand-accent); }
+        
+        .nav-item { 
+            display: block; 
+            padding: 1rem; 
+            color: #cbd5e1; 
+            text-decoration: none; 
+            border-radius: 8px; 
+            margin-bottom: 0.5rem; 
+            transition: background 0.2s, color 0.2s; 
+            font-weight: 500;
+            cursor: pointer;
+        }
+        .nav-item:hover, .nav-item.active { background: var(--brand-accent); color: white; }
+
+        /* --- Mobile Header & Hamburger --- */
+        .mobile-header {
+            display: none;
+            background: white;
+            padding: 1rem;
+            border-bottom: 1px solid var(--border-color);
+            align-items: center;
+            justify-content: space-between;
+            position: sticky;
+            top: 0;
+            z-index: 900;
+        }
+
+        .hamburger { background: none; border: none; font-size: 1.5rem; cursor: pointer; color: var(--brand-dark); }
+        .mobile-logo { font-weight: 800; font-size: 1.2rem; color: var(--brand-dark); }
+        .mobile-logo span { color: var(--brand-accent); }
+
+        /* --- Main Content --- */
+        .main-content { 
+            flex: 1; 
+            padding: 2rem 3rem; 
+            width: 100%;
+            overflow-y: auto; 
+        }
+
+        /* Hide all content sections by default except the active one */
+        .content-section { display: none; animation: fadeIn 0.3s ease; }
+        .content-section.active { display: block; }
+
+        @keyframes fadeIn {
+            from { opacity: 0; transform: translateY(10px); }
+            to { opacity: 1; transform: translateY(0); }
+        }
+        
+        .header { display: flex; justify-content: space-between; align-items: center; margin-bottom: 2.5rem; }
+        .header h1 { color: var(--brand-dark); font-size: 1.8rem; }
+        
+        /* --- Stats Cards --- */
+        .dashboard-cards { 
+            display: grid; 
+            grid-template-columns: repeat(auto-fit, minmax(220px, 1fr)); 
+            gap: 1.5rem; 
+            margin-bottom: 3rem; 
+        }
+        .card { 
+            background: white; 
+            padding: 1.5rem; 
+            border-radius: 12px; 
+            box-shadow: 0 4px 6px rgba(0,0,0,0.02); 
+            border: 1px solid var(--border-color); 
+        }
+        .card h3 { font-size: 0.85rem; color: #64748b; text-transform: uppercase; letter-spacing: 0.5px; }
+        .card .value { font-size: 2.2rem; font-weight: 800; color: var(--brand-dark); margin-top: 0.5rem; }
+
+        /* --- Tables --- */
+        .table-container { 
+            background: white; 
+            border-radius: 12px; 
+            box-shadow: 0 4px 6px rgba(0,0,0,0.02); 
+            padding: 1.5rem; 
+            border: 1px solid var(--border-color); 
+        }
+        .table-container h3 { margin-bottom: 1.5rem; color: var(--brand-dark); }
+        
+        .table-responsive { width: 100%; overflow-x: auto; -webkit-overflow-scrolling: touch; }
+        table { width: 100%; border-collapse: collapse; min-width: 600px; }
+        th, td { padding: 1rem; text-align: left; border-bottom: 1px solid var(--border-color); }
+        th { color: #64748b; font-size: 0.85rem; text-transform: uppercase; font-weight: 600; letter-spacing: 0.5px; }
+        
+        /* --- Status Badges --- */
+        .status { padding: 0.4rem 0.8rem; border-radius: 20px; font-size: 0.75rem; font-weight: 700; display: inline-block; }
+        .status.new { background: #dbeafe; color: #1e3a8a; }
+        .status.contacted { background: #dcfce7; color: #166534; }
+
+        /* Action Button */
+        .action-btn {
+            background: var(--bg-color);
+            border: 1px solid var(--border-color);
+            padding: 0.4rem 0.8rem;
+            border-radius: 6px;
+            cursor: pointer;
+            font-size: 0.8rem;
+            transition: 0.2s;
+        }
+        .action-btn:hover { background: var(--brand-accent); color: white; border-color: var(--brand-accent); }
+
+        /* --- Overlay for Mobile Sidebar --- */
+        .sidebar-overlay { display: none; position: fixed; top: 0; left: 0; right: 0; bottom: 0; background: rgba(0,0,0,0.5); z-index: 999; opacity: 0; transition: opacity 0.3s; }
+
+        /* --- Mobile Responsiveness --- */
+        @media (max-width: 768px) {
+            body { flex-direction: column; }
+            .mobile-header { display: flex; }
+            .sidebar { position: fixed; height: 100vh; transform: translateX(-100%); }
+            .sidebar.active { transform: translateX(0); }
+            .sidebar-overlay.active { display: block; opacity: 1; }
+            .main-content { padding: 1.5rem 1rem; }
+            .header { flex-direction: column; align-items: flex-start; gap: 1rem; }
+        }
+    </style>
+</head>
+<body>
+
+    <div class="mobile-header">
+        <div class="mobile-logo">ANZENCE<span>.</span></div>
+        <button class="hamburger" id="menuBtn">☰</button>
+    </div>
+
+    <div class="sidebar-overlay" id="overlay"></div>
+
+    <div class="sidebar" id="sidebar">
+        <h2>ANZENCE<span>.</span></h2>
+        <a class="nav-item active" data-target="dashboard">Dashboard</a>
+        <a class="nav-item" id="sidebarCount" data-target="preorders">Pre-Orders (0)</a>
+        <a class="nav-item" data-target="inquiries">School Inquiries</a>
+        <a class="nav-item" data-target="settings">Settings</a>
+    </div>
+
+    <div class="main-content">
+        
+        <div id="dashboard" class="content-section active">
+            <div class="header">
+                <h1>Overview</h1>
+                <div style="font-size: 0.9rem;">Logged in as <strong>Admin</strong></div>
+            </div>
+
+            <div class="dashboard-cards">
+                <div class="card">
+                    <h3>Total Pre-Orders</h3>
+                    <div class="value" id="dashboardTotal">0</div>
+                </div>
+                <div class="card">
+                    <h3>School Inquiries</h3>
+                    <div class="value">18</div>
+                </div>
+            </div>
+
+            <div class="table-container">
+                <h3>Recent Submissions</h3>
+                <div class="table-responsive">
+                    <table>
+                        <thead>
+                            <tr>
+                                <th>Date</th>
+                                <th>Name / Institution</th>
+                                <th>Email</th>
+                                <th>Type</th>
+                                <th>Status</th>
+                                <th>Action</th>
+                            </tr>
+                        </thead>
+                        <tbody id="inquiryTable">
+                            </tbody>
+                    </table>
+                </div>
+            </div>
+        </div>
+
+        <div id="preorders" class="content-section">
+            <div class="header">
+                <h1>Pre-Orders Management</h1>
+            </div>
+            <div class="card">
+                <p>This is where your detailed pre-order management system will go.</p>
+                <br>
+                <p style="color: #64748b;">(For now, all recent submissions appear on the Dashboard tab).</p>
+            </div>
+        </div>
+
+        <div id="inquiries" class="content-section">
+            <div class="header">
+                <h1>School Inquiries</h1>
+            </div>
+            <div class="card">
+                <p>Manage and respond to large-scale school inquiry requests here.</p>
+            </div>
+        </div>
+
+        <div id="settings" class="content-section">
+            <div class="header">
+                <h1>Admin Settings</h1>
+            </div>
+            <div class="card">
+                <p>Adjust system preferences, change admin passwords, and update pricing configurations here.</p>
+            </div>
+        </div>
+
+    </div>
+
+    <script>
+        // --- Mobile Sidebar Toggle Logic ---
+        const menuBtn = document.getElementById('menuBtn');
+        const sidebar = document.getElementById('sidebar');
+        const overlay = document.getElementById('overlay');
+
+        function toggleMenu() {
+            sidebar.classList.toggle('active');
+            overlay.classList.toggle('active');
+        }
+
+        menuBtn.addEventListener('click', toggleMenu);
+        overlay.addEventListener('click', toggleMenu);
+
+        // --- Navigation / Tab Switching Logic ---
+        const navItems = document.querySelectorAll('.nav-item');
+        const sections = document.querySelectorAll('.content-section');
+
+        navItems.forEach(item => {
+            item.addEventListener('click', function(e) {
+                e.preventDefault(); 
+                
+                // Remove active class from all nav items, add to clicked
+                navItems.forEach(nav => nav.classList.remove('active'));
+                this.classList.add('active');
+                
+                // Hide all sections
+                sections.forEach(sec => sec.classList.remove('active'));
+                
+                // Show the target section using the data-target attribute
+                const targetId = this.getAttribute('data-target');
+                document.getElementById(targetId).classList.add('active');
+                
+                // Close sidebar on mobile after clicking
+                if(window.innerWidth <= 768) {
+                    toggleMenu();
+                }
+            });
+        });
+
+        // --- Data Retrieval & Table Rendering ---
+        const defaultData = [
+            { date: "Apr 19, 2026", name: "St. John Academy", email: "admin@stjohn.edu.ph", type: "Bulk Order (500+)", status: "New" },
+            { date: "Apr 18, 2026", name: "Juan Dela Cruz", email: "juan.d@gmail.com", type: "Single Pre-Order", status: "Contacted" },
+            { date: "Apr 17, 2026", name: "Metro Manila High", email: "security@mmh.edu.ph", type: "Demo Request", status: "Contacted" }
+        ];
+
+        function loadDashboard() {
+            let inquiries = JSON.parse(localStorage.getItem('anzence_inquiries'));
+            
+            if (!inquiries) {
+                inquiries = defaultData;
+                localStorage.setItem('anzence_inquiries', JSON.stringify(inquiries));
+            }
+
+            const tableBody = document.getElementById('inquiryTable');
+            tableBody.innerHTML = ''; 
+
+            inquiries.forEach((inq, index) => {
+                const tr = document.createElement('tr');
+                
+                let statusBadge = inq.status === 'New' 
+                    ? `<span class="status new">New</span>` 
+                    : `<span class="status contacted">Contacted</span>`;
+                
+                let actionButton = inq.status === 'New'
+                    ? `<button class="action-btn" onclick="updateStatus(${index})">Mark Contacted</button>`
+                    : `<button class="action-btn" disabled style="opacity: 0.5; cursor: default;">Done</button>`;
+
+                tr.innerHTML = `
+                    <td>${inq.date}</td>
+                    <td>${inq.name}</td>
+                    <td>${inq.email}</td>
+                    <td>${inq.type}</td>
+                    <td>${statusBadge}</td>
+                    <td>${actionButton}</td>
+                `;
+                tableBody.appendChild(tr);
+            });
+
+            // Update Counters
+            const totalCount = inquiries.length;
+            document.getElementById('dashboardTotal').innerText = totalCount;
+            document.getElementById('sidebarCount').innerText = `Pre-Orders (${totalCount})`;
+        }
+
+        // --- Change Status Logic ---
+        function updateStatus(index) {
+            let inquiries = JSON.parse(localStorage.getItem('anzence_inquiries'));
+            inquiries[index].status = 'Contacted'; 
+            localStorage.setItem('anzence_inquiries', JSON.stringify(inquiries)); 
+            loadDashboard(); 
+        }
+
+        window.onload = loadDashboard;
+    </script>
+</body>
+</html>
